@@ -5,11 +5,17 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+import android.graphics.BitmapFactory;
+import java.io.FileNotFoundException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,16 +34,27 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener {
 
     Button SubmitButton;
-
     EditText NameEditText, ReportEditText, RepoetType;
+
+
+    // camera
+
+
+    Button btnTakePhoto;
+    ImageView imgTakenPhoto;
+    TextView textTargetUri;
+    ImageView targetImage;
+
+    //end_camera
 
     // Declaring String variable ( In which we are storing firebase server URL ).
 //    public static final String Firebase_Server_URL = "https://insertdata-android-examples.firebaseio.com/";
 
     // Declaring String variables to store name & phone number get from EditText.
     String NameHolder, ReportHolder, ReportTypeHolder ;
-    Double Longti_Holder, Lati_Holder;     ;
+    Double Longti_Holder, Lati_Holder;
 
+    //gps
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected String mLatitudeLabel;
@@ -46,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     protected TextView mLongitudeText;
     public double longtitude;
     public double latitude;
+    //end_gps
 
     protected static final String TAG = "MainActivity";
 
@@ -53,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
     // Root Database Name for Firebase Database.
     public static final String Database_Path = "UserReport_Details_Database";
+    private static final int CAM_REQUEST = 1313;
 
 
     @Override
@@ -60,12 +79,26 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //gps
         mLatitudeLabel = "緯度";
         mLongitudeLabel = "經度";
         mLatitudeText = (TextView) findViewById((R.id.latitude_text));
         mLongitudeText = (TextView) findViewById((R.id.longitude_text));
 
         buildGoogleApiClient();
+        //end_gps
+
+        //camera
+        btnTakePhoto = (Button) findViewById(R.id.button1);
+        imgTakenPhoto = (ImageView) findViewById(R.id.imageview1);
+        btnTakePhoto.setOnClickListener(new btnTakePhotoClicker());
+
+//        Button buttonLoadImage = (Button)findViewById(R.id.loadimage);
+//        textTargetUri = (TextView)findViewById(R.id.targeturi);
+//        targetImage = (ImageView)findViewById(R.id.targetimage);
+//        buttonLoadImage.setOnClickListener(new btnAccessPhotoClicker());
+
+        //end_camera
 
         databaseReference = FirebaseDatabase.getInstance().getReference(Database_Path);
 
@@ -96,9 +129,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 userDetail.setReportType(ReportTypeHolder);
                 userDetail.setLatitude(Lati_Holder);
                 userDetail.setLongtitude(Longti_Holder);
-
-
-
 
                 // Getting the ID from firebase database.
                 String UserRecordIDFromServer = databaseReference.push().getKey();
@@ -252,7 +282,40 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         Log.i(TAG, "Connection suspended");
         mGoogleApiClient.connect();
     }
-}
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == CAM_REQUEST)
+        {
+            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+            imgTakenPhoto.setImageBitmap(thumbnail);
+        }
+
+    }
+
+
+    class btnTakePhotoClicker implements Button.OnClickListener
+    {
+
+        @Override
+        public void onClick(View v) {
+            // TODO Auto-generated method stub
+            Intent cameraintent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(cameraintent, CAM_REQUEST);
+        }
+
+    }
+
+
+
+
+
+}   // end of project
+
 
 
 
