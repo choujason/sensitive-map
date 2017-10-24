@@ -6,7 +6,6 @@ package com.example.po_yeh_chou.textinput_firebase;
 
 public class UserDetail {
 
-
     private String name;
     private String number;
     private String ReportType;
